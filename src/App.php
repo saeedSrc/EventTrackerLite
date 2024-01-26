@@ -4,6 +4,8 @@ namespace App;
 
 use App\Database\Connection;
 use App\Database\EventRepository;
+use App\Database\Queries;
+use App\DTO\Filter;
 use App\Service\JsonReaderInterface;
 
 class App
@@ -58,29 +60,13 @@ class App
         );
     }
 
-    public function getFilteredResults(array $filters): array
+    public function getFilteredResults(Filter $filters): array
     {
-        $employeeName = $filters['employee_name'];
-        $eventName = $filters['event_name'];
-        $eventDate = $filters['event_date'];
-
-        // Escape input to prevent SQL injection
-        $employeeName = $this->eventRepository->escape($employeeName);
-        $eventName = $this->eventRepository->escape($eventName);
-        $eventDate = $this->eventRepository->escape($eventDate);
-
         // Build the SQL query based on the provided filters
-        $query = "SELECT b.*, e.employee_name, ev.event_name
-          FROM bookings b
-          JOIN employees e ON b.employee_id = e.employee_id
-          JOIN events ev ON b.event_id = ev.event_id
-          WHERE 
-          e.employee_name LIKE '%$employeeName%' AND 
-          ev.event_name LIKE '%$eventName%' AND 
-          b.event_date LIKE '%$eventDate%'";
+
 
         // Execute the query and return the results
-        return $this->eventRepository->fetchFilteredResults($query);
+        return $this->eventRepository->fetchFilteredResults($filters);
     }
 
 }

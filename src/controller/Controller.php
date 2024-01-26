@@ -1,5 +1,7 @@
 <?php
 namespace App\Controller;
+use App\DTO\Filter;
+
 class Controller
 {
     private $app;
@@ -11,15 +13,11 @@ class Controller
 
     public function handleFormSubmission()
     {
-        $employeeName = htmlspecialchars($_POST['employee_name'] ?? '');
-        $eventName = htmlspecialchars($_POST['event_name'] ?? '');
-        $eventDate = htmlspecialchars($_POST['event_date'] ?? '');
-
-        $filters = [
-            'employee_name' => $employeeName,
-            'event_name' => $eventName,
-            'event_date' => $eventDate,
-        ];
+        $filters = new Filter(
+            htmlspecialchars($_POST['employee_name'] ?? ' '),
+            htmlspecialchars($_POST['event_name'] ?? ' '),
+            htmlspecialchars($_POST['event_date'] ?? ' ')
+        );
 
         $filteredResults = $this->app->getFilteredResults($filters);
 

@@ -3,6 +3,7 @@
 namespace App\Database;
 
 use App\Constants\Versions;
+use App\DTO\Filter;
 use App\Model\Booking;
 use App\Model\Employee;
 use App\Model\Event;
@@ -76,26 +77,17 @@ class EventRepository
         }
     }
 
-    public function fetchFilteredResults(string $query): array
+    public function fetchFilteredResults(Filter $filters): array
     {
-        $mysqli = $this->connection->getMysqli();
-        $result = $mysqli->query($query);
+        $query = Queries::filter();
 
-        $filteredResults = [];
+        $employeeName = '%' . $filters->getEmployeeName() . '%';
+        $eventName = '%' . $filters->getEventName() . '%';
+        $eventDate = '%' . $filters->getEventDate() . '%';
 
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $filteredResults[] = $row;
-            }
-            $result->free();
-        }
+        $bindParams = ["sss", $employeeName, $eventName, $eventDate];
 
-        return $filteredResults;
-    }
-
-    public function escape(string $value): string
-    {
-        return $this->connection->getMysqli()->real_escape_string($value);
+        return $this->prepareAndFetchFilter($query, $bindParams);
     }
 
     private function convertToUtc(string $eventDate): string
@@ -136,5 +128,52 @@ class EventRepository
         // Close statement
         $stmt->close();
         return $result;
+    }
+
+    public function prepareAndFetchFilter($query, $bindParams): array
+    {
+        // Prepare the statement
+        $result = array();
+        $stmt = $this->connection->getMysqli()->prepare($query);
+
+        if ($stmt === false) {
+            // Handle error, throw an exception, log, etc.
+        }
+
+        // Bind parameters
+        $stmt->bind_param(...$bindParams);
+
+        // Execute the query
+        $stmt->execute();
+
+        // Get the result metadata
+        $meta = $stmt->result_metadata();
+
+        // Fetch the field information
+        $fields = $meta->fetch_fields();
+
+        // Bind variables to the result dynamically
+        $bindParams = [];
+        foreach ($fields as $field) {
+            $fieldName = $field->name;
+            $bindParams[] = &$result[$fieldName];
+        }
+
+        // Bind the variables to the result
+        call_user_func_array([$stmt, 'bind_result'], $bindParams);
+
+        // Fetch results
+        $results = [];
+        while ($stmt->fetch()) {
+            $currentResult = [];
+            foreach ($result as $key => $value) {
+                $currentResult[$key] = $value;
+            }
+            // Append a copy of the result to the results array
+            $results[] = $currentResult;
+        }
+        $stmt->close();
+
+        return $results;
     }
 }
