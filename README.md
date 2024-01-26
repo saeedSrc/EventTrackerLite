@@ -10,6 +10,7 @@ Event Tracker
 - [PHP](https://www.php.net/downloads.php)
 - [Composer](https://getcomposer.org/download/)
 - [MySQL](https://www.mysql.com/downloads/)
+- Web Server (e.g., [Apache](https://httpd.apache.org/download.cgi), [Nginx](https://nginx.org/en/download.html))
 
 ### Running with Docker
 
