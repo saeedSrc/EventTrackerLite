@@ -8,8 +8,6 @@ use App\Model\Employee;
 use App\Model\Event;
 use App\Service\VersionComparator;
 
-
-
 class EventRepository
 {
     private $connection;
@@ -19,89 +17,64 @@ class EventRepository
         $this->connection = $connection;
     }
 
-    public function insertBooking(Booking $booking)
+    public function insertBooking(Booking $booking):int
     {
         $employeeId = $this->getOrCreateEmployeeId($booking->getEmployee());
         $eventId = $this->getOrCreateEventId($booking->getEvent());
-
 
         return $this->getOrCreateBookingId($employeeId, $eventId, $booking);
 
     }
 
-
     private function getOrCreateEmployeeId(Employee $employee): int
     {
-        $mysqli = $this->connection->getMysqli();
+        $query = Queries::getEmployeeId();
+        $employeeId = $this->prepareAndFetch($query, "s", [$employee->getEmail()]);
 
-        $name = $mysqli->real_escape_string($employee->getName());
-        $email = $mysqli->real_escape_string($employee->getEmail());
-
-        // Check if the employee already exists in the database
-        $result = $mysqli->query("SELECT employee_id FROM employees WHERE employee_mail = '$email'");
-
-        if ($result && $result->num_rows > 0) {
+        if ($employeeId) {
             // Employee already exists, return the existing ID
-            $row = $result->fetch_assoc();
-            return (int)$row['employee_id'];
+            return $employeeId;
         } else {
             // Employee doesn't exist, insert a new record and return the new ID
-            $mysqli->query("INSERT INTO employees (employee_name, employee_mail) VALUES ('$name', '$email')");
-            return $mysqli->insert_id;
+            $query = Queries::createEmployee();
+            return $this->prepareAndFetch($query, "ss", [$employee->getName(), $employee->getEmail()], true);
         }
     }
 
     private function getOrCreateEventId(Event $event): int
     {
-        $mysqli = $this->connection->getMysqli();
-
-        $eventName = $mysqli->real_escape_string($event->getName());
-
-        // Check if the event already exists in the database
-        $result = $mysqli->query("SELECT event_id FROM events WHERE event_name = '$eventName'");
-
-        if ($result && $result->num_rows > 0) {
+        $query = Queries::getEventId();
+         $eventId  = $this->prepareAndFetch($query, "s", [$event->getName()]);
+        if ($eventId) {
             // Event already exists, return the existing ID
-            $row = $result->fetch_assoc();
-            return (int)$row['event_id'];
+            return $eventId;
         } else {
             // Event doesn't exist, return null or any other appropriate value
-            $mysqli->query("INSERT INTO events (event_name) VALUES ('$eventName')");
-            return $mysqli->insert_id;
+             $query = Queries::createEvent();
+            return $this->prepareAndFetch($query, "s", [$event->getName()], true);
         }
     }
 
     private function getOrCreateBookingId($employeeId, $eventId, Booking $booking): int
     {
-        $mysqli = $this->connection->getMysqli();
+        $query = Queries::getBookingId();
+        $participationId = $this->prepareAndFetch($query, "s", [$booking->getParticipationId()]);
 
-        $participationId = $booking->getParticipationId();
-
-        // Check if the booking already exists in the database based on participation_id
-        $result = $mysqli->query("SELECT participation_id FROM bookings WHERE participation_id = '$participationId'");
-
-        if ($result && $result->num_rows > 0) {
-            // Booking already exists, return the existing participation_id
-            $row = $result->fetch_assoc();
-            return (int) $row['participation_id'];
+        if ($participationId) {
+            return $participationId;
         } else {
             // Booking doesn't exist, insert a new record and return the provided participation_id
-            $participationFee = $mysqli->real_escape_string($booking->getParticipationFee());
-            $eventDate = $mysqli->real_escape_string($booking->getEventDate());
-            $version = $mysqli->real_escape_string($booking->getVersion());
-            if( VersionComparator::isVersionAfterReference($version, Versions::REFERENCE_VERSION) ) {
-              $eventDate =  $this->convertToUtc($eventDate);
+            $eventDate = $booking->getEventDate();
+            if (VersionComparator::isVersionAfterReference($booking->getVersion(), Versions::REFERENCE_VERSION)) {
+                $eventDate = $this->convertToUtc($eventDate);
             }
 
-            $query = "INSERT INTO bookings (participation_id, employee_id, event_id, participation_fee, event_date, version)
-                      VALUES ('$participationId', '$employeeId', '$eventId', '$participationFee', '$eventDate', '$version')";
-            $mysqli->query($query);
-
-            return $participationId;
+            $query = Queries::createdBooking();
+            return $this->prepareAndFetch($query, "iiisss",
+                [$booking->getParticipationId(), $employeeId, $eventId,
+                    $booking->getParticipationFee(), $eventDate, $booking->getVersion()], true);
         }
     }
-
-
 
     public function fetchFilteredResults(string $query): array
     {
@@ -134,4 +107,34 @@ class EventRepository
         return $dateTime->format('Y-m-d H:i:s');
     }
 
+    // this method returns existing record otherwise it creates new one and returns last inserted id
+    private function prepareAndFetch($query, $parameter_types, $params, $insert = false)
+    {
+        $mysqli = $this->connection->getMysqli();
+        $stmt = $mysqli->prepare($query);
+
+        if ($stmt === false) {
+            // Handle error, throw an exception, log, etc.
+        }
+
+        // Bind parameters
+        if ($parameter_types && $params) {
+            $stmt->bind_param($parameter_types, ...$params);
+        }
+
+        // Execute
+        $stmt->execute();
+
+        if(!$insert) {
+            $stmt->bind_result($result);
+            // Fetch result
+            $stmt->fetch();
+        } else {
+            $result = $stmt->insert_id;
+        }
+
+        // Close statement
+        $stmt->close();
+        return $result;
+    }
 }
