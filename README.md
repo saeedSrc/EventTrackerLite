@@ -35,21 +35,21 @@ Event Tracker
 
 5. Access the application
 
-   simply go to you web server's path that serves this project.
+   simply go to your web server's path that serves this project.
 
 
 ## Usage
 
 1. **Initialization:**
-    - Open your web browser and navigate to [http://localhost:8090/](http://localhost:8090/).
-    - If it's your first time visiting, the database will be initialized, and any unsaved records from the `booking.json` file will be transferred to the database.
+    - Open your web browser and navigate to your web server's path that serves this project.
+    - If it's your first time visiting any unsaved records from the `booking.json` file will be transferred to the database.
 
 2. **Adding New Records:**
     - To add new records, update the `booking.json` file with the desired information.
-    - On subsequent visits to [http://localhost:8090/](http://localhost:8090/), any new records will be automatically saved to the database.
+    - On subsequent visits to your web server's path that serves this project. any new records will be automatically saved to the database.
 
 3. **Viewing All Records:**
-    - Visit [http://localhost:8090/](http://localhost:8090/) to see all records currently stored in the database.
+    - Visit your web server's path that serves this project. to see all records currently stored in the database.
 
 4. **Filtering Records:**
     - Customize your view by using the available filters:
