@@ -62,10 +62,6 @@ class App
 
     public function getFilteredResults(Filter $filters): array
     {
-        // Build the SQL query based on the provided filters
-
-
-        // Execute the query and return the results
         return $this->eventRepository->fetchFilteredResults($filters);
     }
 

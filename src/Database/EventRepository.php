@@ -86,7 +86,6 @@ class EventRepository
         $eventDate = '%' . $filters->getEventDate() . '%';
 
         $bindParams = ["sss", $employeeName, $eventName, $eventDate];
-
         return $this->prepareAndFetchFilter($query, $bindParams);
     }
 

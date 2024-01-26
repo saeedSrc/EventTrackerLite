@@ -6,6 +6,11 @@ class VersionComparator
 {
     public static function isVersionAfterReference(string $version, string $referenceVersion): bool
     {
+
+        if (strpos($version, '+') === false) {
+            $version .= '+0';
+        }
+
         list($versionNumber, $offset) = explode('+', $version);
         list($referenceVersionNumber, $referenceOffset) = explode('+', $referenceVersion);
 

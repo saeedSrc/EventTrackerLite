@@ -18,12 +18,13 @@ class Controller
     public function handleFormSubmission()
     {
         $filters = new Filter(
-            htmlspecialchars($_POST['employee_name'] ?? ' '),
-            htmlspecialchars($_POST['event_name'] ?? ' '),
-            htmlspecialchars($_POST['event_date'] ?? ' ')
+            htmlspecialchars($_POST['employee_name'] ?? ''),
+            htmlspecialchars($_POST['event_name'] ?? ''),
+            htmlspecialchars($_POST['event_date'] ?? '')
         );
 
         $filteredResults = $this->app->getFilteredResults($filters);
+
 
         include __DIR__ . '/../../template/filtered_results.php';
 
