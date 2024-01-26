@@ -13,12 +13,13 @@ use App\Controller\Controller;
 $connection = new Connection($config); // Initialize database connection
 $jsonReader = new JsonFileReader();
 $eventRepository = new EventRepository($connection);
-
 $app = new App($jsonReader, $eventRepository);
-$app->processJsonData(__DIR__ . '/../booking.json');
+$myController = new Controller($app);
+
+// Handle json data
+$myController->processJsonData(__DIR__ . '/../booking.json');
 
 // Handle form submission
-$myController = new Controller($app);
 $myController->handleFormSubmission();
 
 

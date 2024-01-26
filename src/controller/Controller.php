@@ -11,6 +11,10 @@ class Controller
         $this->app = $app;
     }
 
+    public function processJsonData($path) {
+        $this->app->processJsonData($path);
+    }
+
     public function handleFormSubmission()
     {
         $filters = new Filter(
