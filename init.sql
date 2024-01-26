@@ -1,15 +1,18 @@
-CREATE TABLE employees (
+CREATE DATABASE IF NOT EXISTS event_tracker;
+USE event_tracker;
+
+CREATE TABLE IF NOT EXISTS employees (
                            employee_id INT PRIMARY KEY AUTO_INCREMENT,
                            employee_name VARCHAR(255),
                            employee_mail VARCHAR(255)
 );
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
                         event_id INT PRIMARY KEY AUTO_INCREMENT,
                         event_name VARCHAR(255)
 );
 
-CREATE TABLE bookings (
+CREATE TABLE IF NOT EXISTS bookings (
                           participation_id INT PRIMARY KEY AUTO_INCREMENT,
                           employee_id INT,
                           event_id INT,

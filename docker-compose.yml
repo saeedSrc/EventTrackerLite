@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+    container_name: event-tracker
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8090:80"
+
+  db:
+    image: mysql:8
+    container_name: event-tracker-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: event_tracker
+      MYSQL_USER: event_tracker
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
