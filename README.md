@@ -20,6 +20,7 @@ Event Tracker
 
    ```bash
    cd EventTrackerLite
+   git checkout dockerize_project 
 
 3. Build and run
 
