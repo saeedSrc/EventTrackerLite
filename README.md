@@ -12,7 +12,7 @@ Event Tracker
 - [MySQL](https://www.mysql.com/downloads/)
 - Web Server (e.g., [Apache](https://httpd.apache.org/download.cgi), [Nginx](https://nginx.org/en/download.html))
 
-### Running with Docker
+### Running without Docker
 
 1. Install MySQL on your machine.
 2. Create a new database named event_tracker for the project.
